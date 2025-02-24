@@ -1,7 +1,6 @@
+; PinChange.asm
 ;
-; PreLab3.asm
-;
-; Created: 2/16/2025 7:22:10 PM
+; Created: 2/19/2025 10:17:36 AM
 ; Author : Ervin Gomez 231226
 ;
 
@@ -9,9 +8,7 @@
 .cseg
 .org	0x0000
 	JMP INICIO
-.org	INT0addr
-	JMP INTER0
-.org	INT1addr
+.org	PCI0addr
 	JMP INTER1
 
 //Configuracion de la pila 
@@ -29,10 +26,10 @@ SETUP:
 	STS		CLKPR, R16
 
 	// Configuración del bit 2 y 3 como entradas
-	CBI		DDRD, PD2
-	SBI		PORTD, PD2 //Pull-ups activados 
-	CBI		DDRD, PD3
-	SBI		PORTD, PD3 //Pull-ups activados 
+	CBI		DDRB, PB0 
+	//SBI		PORTB, PB0 //Pull-ups activados 
+	CBI		DDRB, PB1
+	//SBI		PORTB, PB1 //Pull-ups activados 
 
 	//Configuración de C como la salida del contador 
 	LDI		R16, 0xFF
@@ -40,13 +37,12 @@ SETUP:
 	LDI		R16, 0x00
 	OUT		PORTC, R16
 
-	//Configuracion de las interrupciones del INT0 e INT1
-	LDI		R16, (0 << ISC01) | (1 << ISC00) | (0 << ISC11) | (1 << ISC10)
-	STS		EICRA, R16
+	//Configuracion de las interrupciones de Pin change
+	LDI		R16, (1 << PCINT1) | (1 << PCINT0)
+	STS		PCMSK0, R16
 
-	SBI		EIMSK, INT0
-	SBI		EIMSK, INT1
-
+	LDI		R16, (1 << PCIE0)
+	STS		PCICR, R16
 
 	CLR		R18
 	OUT		PORTC, R18
@@ -57,33 +53,19 @@ MAIN:
 	RJMP	MAIN
 
 //Logica de interrupciones
-INTER0: 
-	//Interrupcion que realiza el PD2
+INTER1: 
+	//Interrupcion que realiza el conteo 
 	PUSH	R16
 	IN		R16, SREG
 	PUSH	R16
-	PUSH	R17
 
+	IN		R19, PINB
+	SBIS	PINB, PB0
 	CALL	INCREMENT
-	OUT		PORTC, R18
-
-	POP		R17
-	POP		R16
-	OUT		SREG, R16
-	POP		R16
-	RETI
-
-INTER1:
-	//Interrupcion que realiza el PD3
-	PUSH	R16
-	IN		R16, SREG
-	PUSH	R16
-	PUSH	R17
-
+	SBIS	PINB, PB1
 	CALL	DECREMENT
 	OUT		PORTC, R18
 
-	POP		R17
 	POP		R16
 	OUT		SREG, R16
 	POP		R16

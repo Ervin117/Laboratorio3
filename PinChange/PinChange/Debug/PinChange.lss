@@ -1,12 +1,12 @@
 
-AVRASM ver. 2.2.8  C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PreLab3\PreLab3\main.asm Mon Feb 17 16:40:41 2025
+AVRASM ver. 2.2.8  C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PinChange\PinChange\main.asm Thu Feb 20 10:52:52 2025
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PreLab3\PreLab3\main.asm(8): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PinChange\PinChange\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PreLab3\PreLab3\main.asm(8): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PinChange\PinChange\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
                                  
-                                 ;
+                                 ; PinChange.asm
                                  
                                  ;***** Created: 2011-02-09 12:03 ******* Source: ATmega328P.xml **********
                                  ;*************************************************************************
@@ -987,9 +987,8 @@ C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PreLab3\PreLab3\main.asm(
                                  
                                  ; ***** END OF FILE ******************************************************
                                  
-                                 ; PreLab3.asm
                                  ;
-                                 ; Created: 2/16/2025 7:22:10 PM
+                                 ; Created: 2/19/2025 10:17:36 AM
                                  ; Author : Ervin Gomez 231226
                                  ;
                                  
@@ -1039,31 +1038,29 @@ C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PreLab3\PreLab3\main.asm(
                                  ; ***** END OF FILE ******************************************************
                                  .cseg
                                  .org	0x0000
-000000 940c 0006                 	JMP INICIO
-                                 .org	INT0addr
-000002 940c 0022                 	JMP INTER0
-                                 .org	INT1addr
-000004 940c 002e                 	JMP INTER1
+000000 940c 0008                 	JMP INICIO
+                                 .org	PCI0addr
+000006 940c 0023                 	JMP INTER1
                                  
                                  //Configuracion de la pila 
                                  INICIO: 
-000006 ef0f                      	LDI		R16, LOW(RAMEND)
-000007 bf0d                      	OUT		SPL, R16
-000008 e008                      	LDI		R16, HIGH(RAMEND)
-000009 bf0e                      	OUT		SPH, R16
+000008 ef0f                      	LDI		R16, LOW(RAMEND)
+000009 bf0d                      	OUT		SPL, R16
+00000a e008                      	LDI		R16, HIGH(RAMEND)
+00000b bf0e                      	OUT		SPH, R16
                                  
                                  SETUP: 
-00000a 94f8                      	CLI
-00000b e800                      	LDI		R16, (1 << CLKPCE)
-00000c 9300 0061                 	STS		CLKPR, R16
-00000e e004                      	LDI		R16, (1 << CLKPS2)
-00000f 9300 0061                 	STS		CLKPR, R16
+00000c 94f8                      	CLI
+00000d e800                      	LDI		R16, (1 << CLKPCE)
+00000e 9300 0061                 	STS		CLKPR, R16
+000010 e004                      	LDI		R16, (1 << CLKPS2)
+000011 9300 0061                 	STS		CLKPR, R16
                                  
                                  	// Configuración del bit 2 y 3 como entradas
-000011 9852                      	CBI		DDRD, PD2
-000012 9a5a                      	SBI		PORTD, PD2 //Pull-ups activados 
-000013 9853                      	CBI		DDRD, PD3
-000014 9a5b                      	SBI		PORTD, PD3 //Pull-ups activados 
+000013 9820                      	CBI		DDRB, PB0 
+                                 	//SBI		PORTB, PB0 //Pull-ups activados 
+000014 9821                      	CBI		DDRB, PB1
+                                 	//SBI		PORTB, PB1 //Pull-ups activados 
                                  
                                  	//Configuración de C como la salida del contador 
 000015 ef0f                      	LDI		R16, 0xFF
@@ -1071,72 +1068,58 @@ C:\Users\razer\OneDrive\Documentos\GitHub\Laboratorio3\PreLab3\PreLab3\main.asm(
 000017 e000                      	LDI		R16, 0x00
 000018 b908                      	OUT		PORTC, R16
                                  
-                                 	//Configuracion de las interrupciones del INT0 e INT1
-000019 e005                      	LDI		R16, (0 << ISC01) | (1 << ISC00) | (0 << ISC11) | (1 << ISC10)
-00001a 9300 0069                 	STS		EICRA, R16
+                                 	//Configuracion de las interrupciones de Pin change
+000019 e003                      	LDI		R16, (1 << PCINT1) | (1 << PCINT0)
+00001a 9300 006b                 	STS		PCMSK0, R16
                                  
-00001c 9ae8                      	SBI		EIMSK, INT0
-00001d 9ae9                      	SBI		EIMSK, INT1
+00001c e001                      	LDI		R16, (1 << PCIE0)
+00001d 9300 0068                 	STS		PCICR, R16
                                  
-                                 
-00001e 2722                      	CLR		R18
-00001f b928                      	OUT		PORTC, R18
-000020 9478                      	SEI
+00001f 2722                      	CLR		R18
+000020 b928                      	OUT		PORTC, R18
+000021 9478                      	SEI
                                  
                                  MAIN: 
                                  	//Loop infinito 
-000021 cfff                      	RJMP	MAIN
+000022 cfff                      	RJMP	MAIN
                                  
                                  //Logica de interrupciones
-                                 INTER0: 
-                                 	//Interrupcion que realiza el PD2
-000022 930f                      	PUSH	R16
-000023 b70f                      	IN		R16, SREG
-000024 930f                      	PUSH	R16
-000025 931f                      	PUSH	R17
+                                 INTER1: 
+                                 	//Interrupcion que realiza el conteo 
+000023 930f                      	PUSH	R16
+000024 b70f                      	IN		R16, SREG
+000025 930f                      	PUSH	R16
                                  
-000026 940e 003a                 	CALL	INCREMENT
-000028 b928                      	OUT		PORTC, R18
+000026 b133                      	IN		R19, PINB
+000027 9b18                      	SBIS	PINB, PB0
+000028 940e 0032                 	CALL	INCREMENT
+00002a 9b19                      	SBIS	PINB, PB1
+00002b 940e 0037                 	CALL	DECREMENT
+00002d b928                      	OUT		PORTC, R18
                                  
-000029 911f                      	POP		R17
-00002a 910f                      	POP		R16
-00002b bf0f                      	OUT		SREG, R16
-00002c 910f                      	POP		R16
-00002d 9518                      	RETI
-                                 
-                                 INTER1:
-                                 	//Interrupcion que realiza el PD3
-00002e 930f                      	PUSH	R16
-00002f b70f                      	IN		R16, SREG
-000030 930f                      	PUSH	R16
-000031 931f                      	PUSH	R17
-                                 
-000032 940e 003f                 	CALL	DECREMENT
-000034 b928                      	OUT		PORTC, R18
-                                 
-000035 911f                      	POP		R17
-000036 910f                      	POP		R16
-000037 bf0f                      	OUT		SREG, R16
-000038 910f                      	POP		R16
-000039 9518                      	RETI
+00002e 910f                      	POP		R16
+00002f bf0f                      	OUT		SREG, R16
+000030 910f                      	POP		R16
+000031 9518                      	RETI
                                  
                                  INCREMENT: 
                                  	//Logica para incrementar el contador 
-00003a 9523                      	INC		R18
-00003b 3120                      	CPI		R18, 0x10
-00003c f409                      	BRNE	OVER
-00003d e020                      	LDI		R18, 0x00
+000032 9523                      	INC		R18
+000033 3120                      	CPI		R18, 0x10
+000034 f409                      	BRNE	OVER
+000035 e020                      	LDI		R18, 0x00
                                  OVER:
-00003e 9508                      	RET
+000036 9508                      	RET
                                  
                                  DECREMENT: 
                                  	//logica para decrementar el contador 
-00003f 3020                      	CPI		R18, 0x00
-000040 f011                      	BREQ	UNDER
-000041 952a                      	DEC		R18
-000042 9508                      	RET
+000037 3020                      	CPI		R18, 0x00
+000038 f011                      	BREQ	UNDER
+000039 952a                      	DEC		R18
+00003a 9508                      	RET
                                  UNDER: 
-000043 e02f                      	LDI		R18, 0x0F
+00003b e02f                      	LDI		R18, 0x0F
+00003c 9508                      	RET
 
 
 RESOURCE USE INFORMATION
@@ -1156,7 +1139,7 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  26 r17:   4 r18:  10 r19:   0 r20:   0 
+r13:   0 r14:   0 r15:   0 r16:  22 r17:   0 r18:   9 r19:   1 r20:   0 
 r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   0 r31:   0 
 Registers used: 3 out of 35 (8.6%)
@@ -1171,22 +1154,22 @@ brvs  :   0 bset  :   0 bst   :   0 call  :   2 cbi   :   2 cbr   :   0
 clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :   1 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
 cpi   :   2 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   1 jmp   :   3 
-ld    :   0 ldd   :   0 ldi   :   9 lds   :   0 lpm   :   0 lsl   :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   1 jmp   :   2 
+ld    :   0 ldd   :   0 ldi   :  10 lds   :   0 lpm   :   0 lsl   :   0 
 lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   9 pop   :   6 
-push  :   6 rcall :   0 ret   :   3 reti  :   2 rjmp  :   1 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   4 sbic  :   0 sbis  :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   7 pop   :   2 
+push  :   2 rcall :   0 ret   :   3 reti  :   1 rjmp  :   1 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   2 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   3 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   4 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
 Instructions used: 21 out of 113 (18.6%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x00008a    138      0    138   32768   0.4%
+[.cseg] 0x000000 0x00007a    114      0    114   32768   0.3%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
